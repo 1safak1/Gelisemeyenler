@@ -22,36 +22,61 @@ document.addEventListener('DOMContentLoaded', () => {
   let customFoods = JSON.parse(localStorage.getItem(STORAGE_KEYS.CUSTOM_FOODS)) || [];
   let foodDatabase = [...INITIAL_FOOD_DATABASE, ...customFoods];
 
-  // Default User Profile
-  const defaultProfile = {
+  // --------------------------------------------------------------------------
+  // USER PROFILE SWITCHER (Furkan & Ahmet)
+  // --------------------------------------------------------------------------
+  let activeUser = localStorage.getItem('nutrifit_active_user') || 'Furkan';
+
+  const getDefaultProfile = (name) => ({
     gender: 'male',
     age: 25,
-    height: 178,
-    weight: 75,
+    height: name === 'Ahmet' ? 175 : 178,
+    weight: name === 'Ahmet' ? 78 : 75,
     activity: 1.375, // 1-3 gün fitness
     goal: 'maintenance',
     proteinPref: 'high',
-    targetCalories: 2200,
-    targetProtein: 165,
+    targetCalories: name === 'Ahmet' ? 2300 : 2200,
+    targetProtein: name === 'Ahmet' ? 170 : 165,
     targetCarbs: 220,
     targetFat: 70
-  };
+  });
 
-  let userProfile = JSON.parse(localStorage.getItem(STORAGE_KEYS.PROFILE)) || defaultProfile;
+  let userProfile = getDefaultProfile(activeUser);
+  let dailyLogs = {};
 
-  // Daily Logs object: { 'YYYY-MM-DD': [ { id, meal, name, amount, unit, calories, protein, carbs, fat } ] }
-  let dailyLogs = JSON.parse(localStorage.getItem(STORAGE_KEYS.DAILY_LOGS)) || {};
+  function loadUserData(name) {
+    const profileKey = `nutrifit_profile_${name}`;
+    const logsKey = `nutrifit_logs_${name}`;
 
-  // If today has no logs, populate sample demo data for a nice initial experience
-  if (!dailyLogs[currentDate]) {
-    dailyLogs[currentDate] = [
-      { id: 'item_demo_1', meal: 'Kahvaltı', name: 'Yumurta (Tam, Haşlanmış - 1 Adet ~ 50g)', amount: 100, calories: 155, protein: 12.6, carbs: 1.1, fat: 10.6 },
-      { id: 'item_demo_2', meal: 'Kahvaltı', name: 'Yulaf Ezmesi (Kuru)', amount: 60, calories: 233.4, protein: 10.1, carbs: 39.8, fat: 4.1 },
-      { id: 'item_demo_3', meal: 'Öğle Yemeği', name: 'Tavuk Göğsü (Pişmiş)', amount: 180, calories: 297, protein: 55.8, carbs: 0, fat: 6.5 },
-      { id: 'item_demo_4', meal: 'Öğle Yemeği', name: 'Pirinç Pilavı (Sade, Pişmiş)', amount: 150, calories: 195, protein: 4.1, carbs: 42, fat: 0.5 }
-    ];
-    saveDailyLogs();
+    // Furkan legacy data migration check
+    if (name === 'Furkan' && !localStorage.getItem(profileKey) && localStorage.getItem('nutrifit_user_profile')) {
+      userProfile = JSON.parse(localStorage.getItem('nutrifit_user_profile'));
+      dailyLogs = JSON.parse(localStorage.getItem('nutrifit_daily_logs')) || {};
+    } else {
+      userProfile = JSON.parse(localStorage.getItem(profileKey)) || getDefaultProfile(name);
+      dailyLogs = JSON.parse(localStorage.getItem(logsKey)) || {};
+    }
+
+    if (!dailyLogs[currentDate]) {
+      dailyLogs[currentDate] = [
+        { id: `demo_${name}_1`, meal: 'Kahvaltı', name: 'Yumurta (Tam, Haşlanmış - 1 Adet ~ 50g)', amount: 100, calories: 155, protein: 12.6, carbs: 1.1, fat: 10.6 },
+        { id: `demo_${name}_2`, meal: 'Kahvaltı', name: 'Yulaf Ezmesi (Kuru)', amount: 60, calories: 233.4, protein: 10.1, carbs: 39.8, fat: 4.1 },
+        { id: `demo_${name}_3`, meal: 'Öğle Yemeği', name: 'Tavuk Göğsü (Izgara / Haşlanmış, Pişmiş)', amount: 180, calories: 297, protein: 55.8, carbs: 0, fat: 6.5 }
+      ];
+      saveUserData();
+    }
   }
+
+  function saveUserData() {
+    localStorage.setItem(`nutrifit_profile_${activeUser}`, JSON.stringify(userProfile));
+    localStorage.setItem(`nutrifit_logs_${activeUser}`, JSON.stringify(dailyLogs));
+    if (activeUser === 'Furkan') {
+      localStorage.setItem('nutrifit_user_profile', JSON.stringify(userProfile));
+      localStorage.setItem('nutrifit_daily_logs', JSON.stringify(dailyLogs));
+    }
+  }
+
+  loadUserData(activeUser);
 
   // Active state for add-food modal
   let selectedFoodForModal = null;
@@ -275,11 +300,11 @@ document.addEventListener('DOMContentLoaded', () => {
       targetFat: res.targetFat
     };
 
-    localStorage.setItem(STORAGE_KEYS.PROFILE, JSON.stringify(userProfile));
+    saveUserData();
 
     // Refresh Daily Tracker UI & notify user
     renderDailyTracker();
-    showToast('Harika! Günlük kalori ve makro hedefleriniz güncellendi.', 'success');
+    showToast(`Harika! ${activeUser} için günlük hedefler kaydedildi.`, 'success');
     
     // Switch to tracker tab
     document.querySelector('[data-tab="tab-tracker"]').click();
@@ -325,7 +350,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // 5. DAILY TRACKER RENDER & MEAL LOGS MANAGEMENT
   // --------------------------------------------------------------------------
   function saveDailyLogs() {
-    localStorage.setItem(STORAGE_KEYS.DAILY_LOGS, JSON.stringify(dailyLogs));
+    saveUserData();
   }
 
   function renderDailyTracker() {
@@ -714,8 +739,43 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // --------------------------------------------------------------------------
+  // USER SWITCHER (Furkan / Ahmet) INTERACTION
+  // --------------------------------------------------------------------------
+  const appUserTitle = document.getElementById('app-user-title');
+  const userToggleBtns = document.querySelectorAll('.user-toggle-btn');
+
+  function updateAppUserUI(name) {
+    if (appUserTitle) {
+      appUserTitle.textContent = name;
+    }
+    document.title = `${name} | Fitness & Makro Takibi`;
+    userToggleBtns.forEach(btn => {
+      btn.classList.toggle('active', btn.getAttribute('data-user') === name);
+    });
+  }
+
+  function switchUser(name) {
+    if (activeUser === name) return;
+    activeUser = name;
+    localStorage.setItem('nutrifit_active_user', activeUser);
+    updateAppUserUI(activeUser);
+    loadUserData(activeUser);
+    populateCalcForm();
+    renderDailyTracker();
+    showToast(`${activeUser} profiline geçildi!`, 'info');
+  }
+
+  userToggleBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const selected = btn.getAttribute('data-user');
+      switchUser(selected);
+    });
+  });
+
+  // --------------------------------------------------------------------------
   // INITIALIZE
   // --------------------------------------------------------------------------
+  updateAppUserUI(activeUser);
   populateCalcForm();
   renderDailyTracker();
   renderDatabaseList();

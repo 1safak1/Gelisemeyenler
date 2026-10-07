@@ -140,6 +140,43 @@ body {
   font-weight: 500;
 }
 
+/* User Switcher (Furkan / Ahmet) */
+.user-switcher {
+  display: flex;
+  background: rgba(0, 0, 0, 0.35);
+  padding: 3px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+  gap: 3px;
+}
+
+.user-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.95rem;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.user-toggle-btn:hover {
+  color: var(--text-main);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.user-toggle-btn.active {
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  color: white;
+  box-shadow: 0 3px 10px rgba(99, 102, 241, 0.4);
+}
+
 /* Nav Tabs */
 .nav-tabs {
   display: flex;
@@ -1191,6 +1228,16 @@ body {
 
   .brand-text h1 {
     font-size: 1.2rem;
+  }
+
+  .user-switcher {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .user-toggle-btn {
+    justify-content: center;
   }
 
   .nav-tabs {
