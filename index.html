@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NutriFit | Kişisel Makro & Besin Hesaplayıcı</title>
+  <meta name="description" content="Fitness hedeflerinize uygun günlük protein, karbonhidrat, yağ ve kalori ihtiyacınızı hesaplayın ve yediklerinizi kolayca takip edin.">
+  
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="brand">
+        <div class="brand-icon">
+          <i class="fa-solid fa-bolt"></i>
+        </div>
+        <div class="brand-text">
+          <h1>NutriFit</h1>
+          <span>Fitness Makro & Besin Takibi</span>
+        </div>
+      </div>
+
+      <nav class="nav-tabs">
+        <button class="nav-btn active" data-tab="tab-tracker">
+          <i class="fa-solid fa-utensils"></i>
+          <span>Günlük Takip</span>
+        </button>
+        <button class="nav-btn" data-tab="tab-calculator">
+          <i class="fa-solid fa-calculator"></i>
+          <span>Makro Hesapla</span>
+        </button>
+        <button class="nav-btn" data-tab="tab-database">
+          <i class="fa-solid fa-book-open"></i>
+          <span>Besin Rehberi</span>
+        </button>
+      </nav>
+
+      <div class="header-actions">
+        <div class="date-picker-wrapper">
+          <i class="fa-regular fa-calendar-days"></i>
+          <input type="date" id="log-date-picker">
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      
+      <!-- TAB 1: GÜNLÜK TAKİP (DAILY TRACKER) -->
+      <section id="tab-tracker" class="tab-page active">
+        <!-- Target Overview Cards -->
+        <div class="macro-dashboard-grid">
+          
+          <!-- Calories Ring & Summary -->
+          <div class="card card-glass calories-summary-card">
+            <div class="card-title">
+              <h3><i class="fa-solid fa-fire"></i> Günlük Kalori</h3>
+              <button class="btn-text-sm" id="btn-edit-targets"><i class="fa-solid fa-pen-to-square"></i> Hedefleri Düzenle</button>
+            </div>
+            
+            <div class="calories-gauge-container">
+              <svg class="progress-ring" width="160" height="160">
+                <circle class="progress-ring__circle-bg" stroke="rgba(255,255,255,0.07)" stroke-width="12" fill="transparent" r="68" cx="80" cy="80"/>
+                <circle id="calorie-ring" class="progress-ring__circle" stroke="url(#gradient-calories)" stroke-width="12" stroke-dasharray="427" stroke-dashoffset="427" stroke-linecap="round" fill="transparent" r="68" cx="80" cy="80"/>
+                <defs>
+                  <linearGradient id="gradient-calories" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#8b5cf6" />
+                    <stop offset="100%" stop-color="#ec4899" />
+                  </linearGradient>
+                </defs>
+              </svg>
+              <div class="gauge-center-text">
+                <span class="consumed-calories" id="val-consumed-calories">0</span>
+                <span class="target-calories">/ <span id="val-target-calories">2200</span> kcal</span>
+                <span class="remaining-calories" id="val-remaining-calories">2200 kcal kaldı</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Macros Breakdown (Protein, Carbs, Fat) -->
+          <div class="card card-glass macros-summary-card">
+            <div class="card-title">
+              <h3><i class="fa-solid fa-chart-pie"></i> Makro Dağılımı</h3>
+              <span class="badge-tag">Fitness Hedefi</span>
+            </div>
+
+            <div class="macros-bars-list">
+              <!-- Protein Bar -->
+              <div class="macro-bar-item protein-item">
+                <div class="macro-info">
+                  <div class="macro-label">
+                    <span class="macro-dot protein-dot"></span>
+                    <span class="macro-name">Protein</span>
+                  </div>
+                  <div class="macro-values">
+                    <strong id="val-consumed-protein">0</strong> / <span id="val-target-protein">150</span>g
+                  </div>
+                </div>
+                <div class="bar-bg">
+                  <div class="bar-fill protein-fill" id="bar-protein" style="width: 0%;"></div>
+                </div>
+                <div class="macro-subtext" id="subtext-protein">%0 tamamlandı</div>
+              </div>
+
+              <!-- Carbs Bar -->
+              <div class="macro-bar-item carbs-item">
+                <div class="macro-info">
+                  <div class="macro-label">
+                    <span class="macro-dot carbs-dot"></span>
+                    <span class="macro-name">Karbonhidrat</span>
+                  </div>
+                  <div class="macro-values">
+                    <strong id="val-consumed-carbs">0</strong> / <span id="val-target-carbs">235</span>g
+                  </div>
+                </div>
+                <div class="bar-bg">
+                  <div class="bar-fill carbs-fill" id="bar-carbs" style="width: 0%;"></div>
+                </div>
+                <div class="macro-subtext" id="subtext-carbs">%0 tamamlandı</div>
+              </div>
+
+              <!-- Fat Bar -->
+              <div class="macro-bar-item fat-item">
+                <div class="macro-info">
+                  <div class="macro-label">
+                    <span class="macro-dot fat-dot"></span>
+                    <span class="macro-name">Yağ</span>
+                  </div>
+                  <div class="macro-values">
+                    <strong id="val-consumed-fat">0</strong> / <span id="val-target-fat">65</span>g
+                  </div>
+                </div>
+                <div class="bar-bg">
+                  <div class="bar-fill fat-fill" id="bar-fat" style="width: 0%;"></div>
+                </div>
+                <div class="macro-subtext" id="subtext-fat">%0 tamamlandı</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Meals Section -->
+        <div class="meals-container">
+          <div class="meals-header">
+            <h2><i class="fa-solid fa-list-check"></i> Günlük Öğünleriniz</h2>
+            <button class="btn btn-primary" id="btn-quick-add-food">
+              <i class="fa-solid fa-plus"></i> Yiyecek Ekle
+            </button>
+          </div>
+
+          <div class="meals-grid">
+            
+            <!-- Kahvaltı -->
+            <div class="meal-card card-glass" data-meal="Kahvaltı">
+              <div class="meal-header">
+                <div class="meal-title">
+                  <i class="fa-solid fa-egg icon-kahvalti"></i>
+                  <h4>Kahvaltı</h4>
+                </div>
+                <div class="meal-summary" id="summary-Kahvaltı">0 kcal</div>
+              </div>
+              <div class="meal-items-list" id="list-Kahvaltı">
+                <div class="empty-meal">Henüz yiyecek eklenmedi.</div>
+              </div>
+              <button class="btn-add-meal-item" data-meal-type="Kahvaltı">
+                <i class="fa-solid fa-plus"></i> Kahvaltıya Ekle
+              </button>
+            </div>
+
+            <!-- Öğle Yemeği -->
+            <div class="meal-card card-glass" data-meal="Öğle Yemeği">
+              <div class="meal-header">
+                <div class="meal-title">
+                  <i class="fa-solid fa-bowl-rice icon-ogle"></i>
+                  <h4>Öğle Yemeği</h4>
+                </div>
+                <div class="meal-summary" id="summary-Öğle Yemeği">0 kcal</div>
+              </div>
+              <div class="meal-items-list" id="list-Öğle Yemeği">
+                <div class="empty-meal">Henüz yiyecek eklenmedi.</div>
+              </div>
+              <button class="btn-add-meal-item" data-meal-type="Öğle Yemeği">
+                <i class="fa-solid fa-plus"></i> Öğle Yemeğine Ekle
+              </button>
+            </div>
+
+            <!-- Akşam Yemeği -->
+            <div class="meal-card card-glass" data-meal="Akşam Yemeği">
+              <div class="meal-header">
+                <div class="meal-title">
+                  <i class="fa-solid fa-drumstick-bite icon-aksam"></i>
+                  <h4>Akşam Yemeği</h4>
+                </div>
+                <div class="meal-summary" id="summary-Akşam Yemeği">0 kcal</div>
+              </div>
+              <div class="meal-items-list" id="list-Akşam Yemeği">
+                <div class="empty-meal">Henüz yiyecek eklenmedi.</div>
+              </div>
+              <button class="btn-add-meal-item" data-meal-type="Akşam Yemeği">
+                <i class="fa-solid fa-plus"></i> Akşam Yemeğine Ekle
+              </button>
+            </div>
+
+            <!-- Atıştırmalık / Spor Öncesi-Sonrası -->
+            <div class="meal-card card-glass" data-meal="Atıştırmalık & Spor">
+              <div class="meal-header">
+                <div class="meal-title">
+                  <i class="fa-solid fa-dumbbell icon-atistirmalik"></i>
+                  <h4>Atıştırmalık & Spor Öğünü</h4>
+                </div>
+                <div class="meal-summary" id="summary-Atıştırmalık & Spor">0 kcal</div>
+              </div>
+              <div class="meal-items-list" id="list-Atıştırmalık & Spor">
+                <div class="empty-meal">Henüz yiyecek eklenmedi.</div>
+              </div>
+              <button class="btn-add-meal-item" data-meal-type="Atıştırmalık & Spor">
+                <i class="fa-solid fa-plus"></i> Atıştırmalık Ekle
+              </button>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 2: MAKRO & KALORİ HESAPLAYICI (CALCULATOR) -->
+      <section id="tab-calculator" class="tab-page">
+        <div class="calculator-layout">
+          
+          <div class="card card-glass calc-form-card">
+            <div class="card-header-styled">
+              <i class="fa-solid fa-sliders"></i>
+              <div>
+                <h3>Kişisel Bilgileriniz & Fitness Sıklığınız</h3>
+                <p>Haftalık antrenman temposu ve hedeflerinize göre ideal makro dağılımı hesaplanır.</p>
+              </div>
+            </div>
+
+            <form id="macro-calc-form">
+              <div class="form-row">
+                <div class="form-group">
+                  <label><i class="fa-solid fa-venus-mars"></i> Cinsiyet</label>
+                  <div class="gender-selector">
+                    <label class="gender-option">
+                      <input type="radio" name="gender" value="male" checked>
+                      <div class="gender-box"><i class="fa-solid fa-mars"></i> Erkek</div>
+                    </label>
+                    <label class="gender-option">
+                      <input type="radio" name="gender" value="female">
+                      <div class="gender-box"><i class="fa-solid fa-venus"></i> Kadın</div>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="input-age"><i class="fa-solid fa-cake-candles"></i> Yaş</label>
+                  <input type="number" id="input-age" value="25" min="15" max="90" required>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="input-height"><i class="fa-solid fa-ruler-vertical"></i> Boy (cm)</label>
+                  <input type="number" id="input-height" value="178" min="120" max="230" required>
+                </div>
+
+                <div class="form-group">
+                  <label for="input-weight"><i class="fa-solid fa-weight-scale"></i> Kilo (kg)</label>
+                  <input type="number" id="input-weight" value="75" min="30" max="250" step="0.5" required>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="select-activity"><i class="fa-solid fa-person-running"></i> Fitness / Spor Sıklığı</label>
+                <select id="select-activity">
+                  <option value="1.2">Masa başı / Hareketsiz (Spor yapılmıyor)</option>
+                  <option value="1.375" selected>Haftada 1 - 3 gün Fitness / Spor</option>
+                  <option value="1.55">Haftada 3 - 5 gün Yoğun Fitness / Spor</option>
+                  <option value="1.725">Haftada 6 - 7 gün Ağır Antrenman</option>
+                  <option value="1.9">Günde 2 kez Antrenman / Profesyonel Sporcu</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="select-goal"><i class="fa-solid fa-trophy"></i> Fitness Hedefi</label>
+                <select id="select-goal">
+                  <option value="fat_loss">Yağ Yakımı / Kilo Verme (-%20 Kalori Kalorik Açık)</option>
+                  <option value="maintenance" selected>Kilo & Form Koruma (Dengeli TDEE)</option>
+                  <option value="muscle_gain">Kas Yapma / Kilo Alma (+%15 Kalori Fazlası)</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="select-protein-preference"><i class="fa-solid fa-dumbbell"></i> Protein Seviyesi Tercihi</label>
+                <select id="select-protein-preference">
+                  <option value="normal">Normal Sporcu (1.8g / kg)</option>
+                  <option value="high" selected>Yüksek Protein / Kas Gelişimi (2.2g / kg)</option>
+                  <option value="very_high">Maksimum Kas Koruması (2.5g / kg)</option>
+                </select>
+              </div>
+
+              <button type="submit" class="btn btn-primary btn-block btn-lg">
+                <i class="fa-solid fa-calculator"></i> Makro İhtiyacımı Hesapla
+              </button>
+            </form>
+          </div>
+
+          <!-- Result Display Panel -->
+          <div class="card card-glass calc-result-card" id="calc-result-panel">
+            <div class="result-header">
+              <h3><i class="fa-solid fa-chart-line"></i> Günlük İhtiyaç Özetiniz</h3>
+              <p class="subtitle">Girilen ölçüm ve antrenman sıklığınıza göre hesaplanmıştır.</p>
+            </div>
+
+            <div class="bmr-tdee-grid">
+              <div class="mini-stat-box">
+                <span class="stat-label">Bazal Metabolizma (BMR)</span>
+                <strong class="stat-val" id="res-bmr">1750 kcal</strong>
+                <span class="stat-hint">Hareketsiz vücut harcaması</span>
+              </div>
+              <div class="mini-stat-box highlight">
+                <span class="stat-label">Günlük Harcanan (TDEE)</span>
+                <strong class="stat-val" id="res-tdee">2406 kcal</strong>
+                <span class="stat-hint">Toplam günlük enerji harcaması</span>
+              </div>
+            </div>
+
+            <div class="target-calories-banner">
+              <div class="banner-info">
+                <span>Hedef Günlük Kalori Alımı</span>
+                <h2 id="res-target-calories">2406 <span>kcal / gün</span></h2>
+              </div>
+              <div class="banner-badge" id="res-goal-badge">Kilo Koruma</div>
+            </div>
+
+            <h4 class="section-subtitle">Önerilen Günlük Makrolar (Gram & Kalori)</h4>
+
+            <div class="result-macros-cards">
+              <!-- Protein -->
+              <div class="res-macro-card protein-card">
+                <div class="res-macro-header">
+                  <span class="dot protein-dot"></span>
+                  <span>Protein</span>
+                </div>
+                <div class="res-macro-main">
+                  <strong id="res-protein-g">165g</strong>
+                  <span class="calories-sub" id="res-protein-kcal">660 kcal</span>
+                </div>
+                <div class="res-macro-percent" id="res-protein-pct">%27 Kalori</div>
+              </div>
+
+              <!-- Carbs -->
+              <div class="res-macro-card carbs-card">
+                <div class="res-macro-header">
+                  <span class="dot carbs-dot"></span>
+                  <span>Karbonhidrat</span>
+                </div>
+                <div class="res-macro-main">
+                  <strong id="res-carbs-g">264g</strong>
+                  <span class="calories-sub" id="res-carbs-kcal">1056 kcal</span>
+                </div>
+                <div class="res-macro-percent" id="res-carbs-pct">%44 Kalori</div>
+              </div>
+
+              <!-- Fat -->
+              <div class="res-macro-card fat-card">
+                <div class="res-macro-header">
+                  <span class="dot fat-dot"></span>
+                  <span>Sağlıklı Yağ</span>
+                </div>
+                <div class="res-macro-main">
+                  <strong id="res-fat-g">76g</strong>
+                  <span class="calories-sub" id="res-fat-kcal">684 kcal</span>
+                </div>
+                <div class="res-macro-percent" id="res-fat-pct">%29 Kalori</div>
+              </div>
+            </div>
+
+            <div class="action-footer">
+              <button class="btn btn-accent btn-block" id="btn-apply-targets">
+                <i class="fa-solid fa-circle-check"></i> Bu Hedefleri Günlük Takibime Kaydet
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- TAB 3: BESİN REHBERİ (DATABASE & CUSTOM FOODS) -->
+      <section id="tab-database" class="tab-page">
+        <div class="database-container">
+          <div class="db-header-row">
+            <div>
+              <h2><i class="fa-solid fa-database"></i> Besin Veritabanı & Makro Rehberi</h2>
+              <p>Türkiye'de tüketilen besinlerin 100g değerlerini inceleyin veya kendi özel besininizi ekleyin.</p>
+            </div>
+            <button class="btn btn-primary" id="btn-open-custom-food-modal">
+              <i class="fa-solid fa-plus-circle"></i> Yeni Özel Besin Ekle
+            </button>
+          </div>
+
+          <!-- Filter Bar -->
+          <div class="db-filters-card card-glass">
+            <div class="search-box">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input type="text" id="db-search-input" placeholder="Besin adı ile ara (Örn: Tavuk, Yulaf, Yumurta...)">
+            </div>
+
+            <div class="category-pills" id="db-category-pills">
+              <button class="pill active" data-category="all">Tümü (140+)</button>
+              <button class="pill" data-category="Et & Kümes Hayvanları">Et & Kümes</button>
+              <button class="pill" data-category="Balık & Deniz Ürünleri">Balık</button>
+              <button class="pill" data-category="Yumurta & Süt Ürünleri">Süt & Yumurta</button>
+              <button class="pill" data-category="Tahıl & Bakliyat">Tahıl & Bakliyat</button>
+              <button class="pill" data-category="Ev Yemekleri & Çorbalar">Ev Yemekleri & Çorbalar</button>
+              <button class="pill" data-category="Sebze & Yeşillik">Sebze & Yeşillik</button>
+              <button class="pill" data-category="Meyve">Meyve</button>
+              <button class="pill" data-category="Kuruyemiş & Tohum">Kuruyemiş & Yağlar</button>
+              <button class="pill" data-category="Sporcu Takviyeleri & Fit">Sporcu & Fit</button>
+              <button class="pill" data-category="Atıştırmalık & Fast Food">Fast Food & Cheat</button>
+              <button class="pill" data-category="Özel">Özel Eklenenler</button>
+            </div>
+          </div>
+
+          <!-- Food Grid Table/Cards -->
+          <div class="db-food-grid" id="db-food-list">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- MODAL 1: ADD FOOD TO MEAL -->
+  <div class="modal-overlay" id="modal-add-food">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-utensils"></i> <span id="modal-meal-name">Öğün</span> İçin Besin Seç</h3>
+        <button class="btn-icon modal-close" id="modal-add-food-close"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div class="modal-body">
+        <div class="search-box mb-3">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" id="modal-food-search" placeholder="Aramak istediğiniz besin... (Örn: Tavuk, Pilav, Yulaf)">
+        </div>
+
+        <div class="food-selector-list" id="modal-food-results">
+          <!-- Populated dynamically -->
+        </div>
+
+        <!-- Selected Food Form -->
+        <div class="selected-food-details card-glass" id="selected-food-panel" style="display: none;">
+          <div class="selected-food-title">
+            <h4 id="sel-food-name">Tavuk Göğsü</h4>
+            <span class="badge" id="sel-food-category">Et</span>
+          </div>
+
+          <div class="portion-input-row">
+            <div class="form-group">
+              <label for="sel-food-amount">Miktar (Gramos / Adet):</label>
+              <div class="amount-input-group">
+                <input type="number" id="sel-food-amount" value="100" min="1" max="2000">
+                <span id="sel-food-unit">g</span>
+              </div>
+            </div>
+
+            <div class="calculated-macros-preview">
+              <div class="macro-badge text-calories"><span id="prev-kcal">165</span> kcal</div>
+              <div class="macro-badge text-protein">P: <span id="prev-protein">31</span>g</div>
+              <div class="macro-badge text-carbs">K: <span id="prev-carbs">0</span>g</div>
+              <div class="macro-badge text-fat">Y: <span id="prev-fat">3.6</span>g</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary modal-close">İptal</button>
+        <button class="btn btn-primary" id="btn-confirm-add-food" disabled>Öğüne Ekle</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 2: ADD CUSTOM FOOD TO DATABASE -->
+  <div class="modal-overlay" id="modal-custom-food">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-plus-circle"></i> Yeni Özel Besin Tanımla</h3>
+        <button class="btn-icon modal-close" id="modal-custom-food-close"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <form id="custom-food-form">
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="cf-name">Besin Adı *</label>
+            <input type="text" id="cf-name" placeholder="Örn: Ev Yapımı Proteini Yüksek Kek" required>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="cf-category">Kategori</label>
+              <select id="cf-category">
+                <option value="Et & Kümes Hayvanları">Et & Kümes</option>
+                <option value="Balık & Deniz Ürünleri">Balık</option>
+                <option value="Yumurta & Süt Ürünleri">Süt & Yumurta</option>
+                <option value="Tahıl & Bakliyat">Tahıl & Bakliyat</option>
+                <option value="Ev Yemekleri & Çorbalar">Ev Yemekleri & Çorbalar</option>
+                <option value="Sebze & Yeşillik">Sebze & Yeşillik</option>
+                <option value="Meyve">Meyve</option>
+                <option value="Kuruyemiş & Tohum">Kuruyemiş & Tohum</option>
+                <option value="Sporcu Takviyeleri & Fit">Sporcu Takviyesi & Fit</option>
+                <option value="Atıştırmalık & Fast Food">Atıştırmalık & Fast Food</option>
+                <option value="Özel" selected>Diğer / Özel</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="cf-unit">Birim</label>
+              <select id="cf-unit">
+                <option value="g" selected>Gram (100g bazında)</option>
+                <option value="ml">Mililitre (100ml bazında)</option>
+                <option value="adet">Adet / Porsiyon</option>
+              </select>
+            </div>
+          </div>
+
+          <p class="help-text">Aşağıdaki değerleri <strong>100 gram / ml veya 1 adet</strong> için girin:</p>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="cf-calories">Kalori (kcal) *</label>
+              <input type="number" id="cf-calories" step="0.1" placeholder="Örn: 250" required>
+            </div>
+
+            <div class="form-group">
+              <label for="cf-protein">Protein (g) *</label>
+              <input type="number" id="cf-protein" step="0.1" placeholder="Örn: 20" required>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="cf-carbs">Karbonhidrat (g) *</label>
+              <input type="number" id="cf-carbs" step="0.1" placeholder="Örn: 30" required>
+            </div>
+
+            <div class="form-group">
+              <label for="cf-fat">Yağ (g) *</label>
+              <input type="number" id="cf-fat" step="0.1" placeholder="Örn: 5" required>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary modal-close">İptal</button>
+          <button type="submit" class="btn btn-primary">Veritabanına Kaydet</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="foods.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
